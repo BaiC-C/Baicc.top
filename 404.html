@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/image/bukalapak.svg" type="image/svg+xml">
+    <title>页面未找到 | 栢城个人站</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(33, 38, 45, 0.8) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(33, 38, 45, 0.8) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .error-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            background: linear-gradient(45deg, #f85149, #da3633);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(248, 81, 73, 0.3);
+            overflow: hidden;
+            border: 3px solid #30363d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .error-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(218, 54, 51, 0.5);
+        }
+        
+        .error-icon i {
+            font-size: 60px;
+            color: #fff;
+        }
+        
+        .error-code {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #f85149, #da3633);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+        
+        .error-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #c9d1d9;
+        }
+        
+        .error-message {
+            font-size: 1.2rem;
+            color: #8b949e;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .link-btn:hover {
+            background-color: #30363d;
+            border-color: #58a6ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .link-btn.home:hover {
+            border-color: #238636;
+            color: #7ee787;
+        }
+        
+        .link-btn.github:hover {
+            border-color: #238636;
+            color: #7ee787;
+        }
+        
+        .link-btn.contact:hover {
+            border-color: #c6bd7cff;
+            color: #c6bd7cff;
+        }
+        
+        .link-btn i {
+            font-size: 1.2rem;
+        }
+        
+        .copyright {
+            margin-top: 100px;
+            color: #6e7681;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .debug-note {
+            margin-top: 40px;
+            padding: 15px;
+            background-color: rgba(33, 38, 45, 0.5);
+            border-left: 4px solid #238636;
+            border-radius: 4px;
+            max-width: 600px;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #8b949e;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 4rem;
+            }
+            
+            .error-title {
+                font-size: 1.8rem;
+            }
+            
+            .error-message {
+                font-size: 1.1rem;
+            }
+            
+            .links-container {
+                gap: 15px;
+            }
+            
+            .link-btn {
+                min-width: 160px;
+                padding: 12px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 3.2rem;
+            }
+            
+            .error-title {
+                font-size: 1.5rem;
+            }
+            
+            .error-message {
+                font-size: 1rem;
+            }
+            
+            .error-icon {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .error-icon i {
+                font-size: 50px;
+            }
+            
+            .links-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .link-btn {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .container > * {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .error-icon {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+        
+        .error-code {
+            animation-delay: 0.2s;
+            opacity: 0;
+            animation-name: fadeIn, pulse;
+            animation-duration: 0.8s, 2s;
+            animation-timing-function: ease, ease-in-out;
+            animation-fill-mode: forwards;
+            animation-iteration-count: 1, infinite;
+        }
+        
+        .error-title {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+        
+        .error-message {
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+        
+        .links-container {
+            animation-delay: 0.8s;
+            opacity: 0;
+        }
+        
+        .debug-note {
+            animation-delay: 1s;
+            opacity: 0;
+        }
+        
+        .copyright {
+            animation-delay: 1.2s;
+            opacity: 0;
+        }
+        
+        /* 主题切换开关 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #c9d1d9;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .theme-toggle:hover {
+            background-color: #30363d;
+            transform: rotate(30deg);
+        }
+        
+        /* 浅色主题 */
+        body.light-theme {
+            background-color: #f6f8fa;
+            color: #24292f;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(208, 215, 222, 0.8) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(208, 215, 222, 0.8) 0%, transparent 20%);
+        }
+        
+        body.light-theme .error-title {
+            color: #24292f;
+        }
+        
+        body.light-theme .error-message {
+            color: #57606a;
+        }
+        
+        body.light-theme .link-btn {
+            background-color: #ffffff;
+            border-color: #d0d7de;
+            color: #24292f;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        body.light-theme .link-btn:hover {
+            background-color: #f6f8fa;
+        }
+        
+        body.light-theme .theme-toggle {
+            background-color: #ffffff;
+            border-color: #d0d7de;
+            color: #24292f;
+        }
+        
+        body.light-theme .copyright {
+            color: #6e7781;
+        }
+        
+        body.light-theme .debug-note {
+            background-color: rgba(208, 215, 222, 0.5);
+            color: #57606a;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+    
+    <div class="container">
+        <!-- 错误图标 -->
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <!-- 错误代码 -->
+        <div class="error-code">404</div>
+        
+        <!-- 错误描述 -->
+        <p class="error-message">
+            抱歉，您访问的页面似乎迷失在数字宇宙中。
+            <br>
+            它可能已被移动、删除或从未存在。
+        </p>
+        
+        <!-- 链接按钮区域 -->
+        <div class="links-container">
+            <a href="/" class="link-btn home">
+                <i class="fas fa-home"></i>
+                返回主页
+            </a>
+        </div>
+        
+        <!-- 版权信息 -->
+        <div class="copyright">
+            <p>© 2026 Baicc | 好心态决定男人一生.</p>
+        </div>
+    </div>
+    
+    <script>
+    // 主题切换功能
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    // 从本地存储加载主题
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const isLightTheme = savedTheme === 'light';
+        
+        // 404页面的主题类名与主页不同
+        document.body.classList.toggle('light-theme', isLightTheme);
+        
+        // 更新图标
+        if (isLightTheme) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+    }
+    
+    // 切换主题
+    function toggleTheme() {
+        const isLightTheme = document.body.classList.toggle('light-theme');
+        
+        // 更新图标
+        if (isLightTheme) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+            localStorage.setItem('theme', 'light');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+    
+    // 初始化主题
+    loadTheme();
+    
+    // 添加点击事件
+    themeToggle.addEventListener('click', toggleTheme);
+    
+    // 添加点击按钮的微动效
+    const linkButtons = document.querySelectorAll('.link-btn');
+    linkButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // 创建点击效果
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.5);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+            `;
+            
+            this.appendChild(ripple);
+            
+            // 移除涟漪元素
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // 添加涟漪动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 404页面特殊效果：随机显示不同的错误提示
+    const errorMessages = [
+        "抱歉，您访问的页面似乎迷失在数字宇宙中。",
+        "这个页面可能已被移动、删除或从未存在。",
+        "看起来您遇到了一个不存在的页面。",
+        "404错误：页面在调试中消失了。",
+        "代码构建的世界也有缺失的页面。"
+    ];
+    
+    // 随机选择一条错误消息（每5次刷新随机更换一次）
+    const randomIndex = Math.floor(Math.random() * errorMessages.length);
+    const errorMessageElement = document.querySelector('.error-message');
+    if (errorMessageElement && Math.random() > 0.8) { // 20%的几率更换消息
+        errorMessageElement.innerHTML = errorMessages[randomIndex] + 
+            "<br>建议检查URL是否正确，或使用上面的链接导航到其他页面。";
+    }
+</script>
+</body>
+</html>
