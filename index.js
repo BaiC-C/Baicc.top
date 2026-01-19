@@ -1,4 +1,4 @@
-// 弹幕数据 正常精选数据库获取
+// 弹幕数据 正常从数据库获取
 const danmuMessages = [
     { author: "DoN", content: "网站设计得很棒！", time: "10:31", color: "#238636" },
     { author: "Panda", content: "猜猜我是谁", time: "11:15", color: "#58a6ff" },
@@ -17,6 +17,8 @@ let selectedColor = "#238636";
 // 弹幕状态控制
 let danmuEnabled = true;
 let danmuInterval = null;
+
+// ==================== 弹幕核心功能 ====================
 
 // 创建弹幕轨道
 function createDanmuTracks() {
@@ -107,7 +109,6 @@ function sendDanmu(name, content, color) {
     
     // 添加到弹幕列表
     danmuMessages.push(newDanmu);
-    //存进数据库
     
     // 清空表单
     document.getElementById('danmuName').value = '';
@@ -125,24 +126,15 @@ function sendDanmu(name, content, color) {
     }, 3000);
 }
 
-// 更新弹幕预览
-function updateDanmuPreview() {
-    const name = document.getElementById('danmuName').value || '访客';
-    const content = document.getElementById('danmuContent').value || '弹幕内容';
-    
-    const previewElement = document.getElementById('danmuPreview');
-    previewElement.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-user-circle" style="color: ${selectedColor};"></i>
-            <strong style="color: ${selectedColor};">${name}：</strong>
-            <span>${content}</span>
-        </div>
-    `;
-}
-
 // 连续生成弹幕
 function startDanmu() {
     if (!danmuEnabled) return;
+    
+    // 清除之前的定时器
+    if (danmuInterval) {
+        clearInterval(danmuInterval);
+        danmuInterval = null;
+    }
     
     const trackCount = createDanmuTracks();
     
@@ -151,11 +143,6 @@ function startDanmu() {
         setTimeout(() => {
             createDanmu(danmuMessages[i]);
         }, i * 800);
-    }
-    
-    // 清除之前的定时器
-    if (danmuInterval) {
-        clearInterval(danmuInterval);
     }
     
     // 持续生成弹幕
@@ -169,6 +156,27 @@ function startDanmu() {
         index++;
     }, 2000);
 }
+
+// 处理窗口大小变化
+function handleResize() {
+    if (!danmuEnabled) return;
+    
+    // 清除当前所有弹幕
+    const danmuElements = document.querySelectorAll('.danmu-bubble');
+    danmuElements.forEach(el => el.remove());
+    
+    // 重新启动弹幕系统
+    startDanmu();
+}
+
+// 使用防抖技术优化 resize 事件
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(handleResize, 300);
+});
+
+// ==================== 弹幕开关控制 ====================
 
 // 切换弹幕显示状态
 function toggleDanmu() {
@@ -215,41 +223,135 @@ function toggleDanmu() {
     localStorage.setItem('danmuEnabled', danmuEnabled);
 }
 
-// 显示提示信息
-function showToast(message) {
-    // 移除现有的提示
-    const existingToast = document.querySelector('.toast-message');
-    if (existingToast) {
-        existingToast.remove();
+// 加载弹幕状态
+function loadDanmuState() {
+    const savedDanmuState = localStorage.getItem('danmuEnabled');
+    if (savedDanmuState !== null) {
+        danmuEnabled = savedDanmuState === 'true';
     }
     
-    // 创建新的提示
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        top: 90px;
-        right: 60px;
-        background-color: #238686;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        z-index: 1000;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        animation: fadeInOut 2s ease;
-    `;
+    const danmuToggle = document.getElementById('danmuToggle');
+    const danmuIcon = danmuToggle.querySelector('i');
     
-    document.body.appendChild(toast);
-    
-    // 2秒后移除提示
-    setTimeout(() => {
-        toast.remove();
-    }, 2000);
+    if (!danmuEnabled) {
+        danmuToggle.classList.add('disabled');
+        danmuIcon.classList.remove('fa-comments');
+        danmuIcon.classList.add('fa-comment-slash');
+        
+        const container = document.getElementById('danmuContainer');
+        container.style.display = 'none';
+        
+        // 确保清除间隔器
+        if (danmuInterval) {
+            clearInterval(danmuInterval);
+            danmuInterval = null;
+        }
+    }
 }
 
-// 下班倒计时功能
+// ==================== 弹幕表单功能 ====================
+
+// 更新弹幕预览
+function updateDanmuPreview() {
+    const name = document.getElementById('danmuName').value || '访客';
+    const content = document.getElementById('danmuContent').value || '弹幕内容';
+    
+    const previewElement = document.getElementById('danmuPreview');
+    previewElement.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-user-circle" style="color: ${selectedColor};"></i>
+            <strong style="color: ${selectedColor};">${name}：</strong>
+            <span>${content}</span>
+        </div>
+    `;
+}
+
+// 侧边栏功能初始化
+function initSidebar() {
+    const danmuSidebar = document.getElementById('danmuSidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    
+    // 切换侧边栏展开状态
+    sidebarToggle.addEventListener('click', function() {
+        danmuSidebar.classList.toggle('expanded');
+    });
+    
+    // 颜色选择功能
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // 移除所有选项的选中状态
+            colorOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // 添加当前选项的选中状态
+            this.classList.add('selected');
+            
+            // 更新选中颜色
+            selectedColor = this.getAttribute('data-color');
+            
+            // 更新预览
+            updateDanmuPreview();
+        });
+    });
+    
+    // 表单输入实时预览
+    document.getElementById('danmuName').addEventListener('input', updateDanmuPreview);
+    document.getElementById('danmuContent').addEventListener('input', updateDanmuPreview);
+    
+    // 预览按钮
+    document.getElementById('previewBtn').addEventListener('click', updateDanmuPreview);
+    
+    // 表单提交
+    document.getElementById('danmuForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('danmuName').value;
+        const content = document.getElementById('danmuContent').value;
+        
+        sendDanmu(name, content, selectedColor);
+    });
+}
+
+// ==================== 主题切换功能 ====================
+
+// 加载主题
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const isDarkTheme = savedTheme === 'dark';
+    
+    // 应用主题
+    document.body.classList.toggle('dark-theme', isDarkTheme);
+    
+    // 更新图标
+    const themeIcon = document.querySelector('#themeToggle i');
+    if (isDarkTheme) {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    } else {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    }
+}
+
+// 切换主题
+function toggleTheme() {
+    const isDarkTheme = document.body.classList.toggle('dark-theme');
+    const themeIcon = document.querySelector('#themeToggle i');
+    
+    // 更新图标
+    if (isDarkTheme) {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// ==================== 下班倒计时功能 ====================
+
 function updateCountdown() {
     const now = new Date();
     const targetHour = 17;
@@ -292,106 +394,79 @@ function updateCountdown() {
     }
 }
 
-// 主题切换功能
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = themeToggle.querySelector('i');
+// ==================== 辅助功能 ====================
 
-// 从本地存储加载主题
-function loadTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    const isDarkTheme = savedTheme === 'dark';
-    
-    // 应用主题
-    document.body.classList.toggle('dark-theme', isDarkTheme);
-    
-    // 更新图标
-    if (isDarkTheme) {
-        themeIcon.classList.remove('fa-sun');
-        themeIcon.classList.add('fa-moon');
-    } else {
-        themeIcon.classList.remove('fa-moon');
-        themeIcon.classList.add('fa-sun');
+// 显示提示信息
+function showToast(message) {
+    // 移除现有的提示
+    const existingToast = document.querySelector('.toast-message');
+    if (existingToast) {
+        existingToast.remove();
     }
+    
+    // 创建新的提示
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 90px;
+        right: 60px;
+        background-color: #238686;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: fadeInOut 2s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // 2秒后移除提示
+    setTimeout(() => {
+        toast.remove();
+    }, 2000);
 }
 
-// 切换主题
-function toggleTheme() {
-    const isDarkTheme = document.body.classList.toggle('dark-theme');
-    
-    // 更新图标
-    if (isDarkTheme) {
-        themeIcon.classList.remove('fa-sun');
-        themeIcon.classList.add('fa-moon');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        themeIcon.classList.remove('fa-moon');
-        themeIcon.classList.add('fa-sun');
-        localStorage.setItem('theme', 'light');
-    }
-}
-
-// 初始化主题
-loadTheme();
-
-// 添加点击事件
-themeToggle.addEventListener('click', toggleTheme);
-
-// 加载弹幕状态
-function loadDanmuState() {
-    const savedDanmuState = localStorage.getItem('danmuEnabled');
-    if (savedDanmuState !== null) {
-        danmuEnabled = savedDanmuState === 'true';
-    }
-    
-    const danmuToggle = document.getElementById('danmuToggle');
-    const danmuIcon = danmuToggle.querySelector('i');
-    
-    if (!danmuEnabled) {
-        danmuToggle.classList.add('disabled');
-        danmuIcon.classList.remove('fa-comments');
-        danmuIcon.classList.add('fa-comment-slash');
-        
-        const container = document.getElementById('danmuContainer');
-        container.style.display = 'none';
-    }
-}
-
-// 添加弹幕开关点击事件
-document.getElementById('danmuToggle').addEventListener('click', toggleDanmu);
-
-// 添加点击按钮的微动效
-const linkButtons = document.querySelectorAll('.link-btn');
-linkButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-        // 创建点击效果
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.cssText = `
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.1);
-            transform: scale(0);
-            animation: ripple-animation 0.6s linear;
-            width: ${size}px;
-            height: ${size}px;
-            top: ${y}px;
-            left: ${x}px;
-        `;
-        
-        this.appendChild(ripple);
-        
-        // 移除涟漪元素
-        setTimeout(() => {
-            ripple.remove();
-        }, 600);
+// 添加涟漪动画效果
+function initButtonEffects() {
+    const linkButtons = document.querySelectorAll('.link-btn');
+    linkButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // 创建点击效果
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.1);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+            `;
+            
+            this.appendChild(ripple);
+            
+            // 移除涟漪元素
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
     });
-});
+}
 
-// 添加涟漪动画样式
+// ==================== 动画样式 ====================
+
+// 添加动画样式
 const style = document.createElement('style');
 style.textContent = `
     @keyframes ripple-animation {
@@ -410,64 +485,36 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// 初始化倒计时
-updateCountdown();
+// ==================== 主初始化函数 ====================
 
-// 每秒更新一次倒计时
-setInterval(updateCountdown, 1000);
-
-// 加载弹幕状态
-loadDanmuState();
-
-// 启动弹幕系统
-window.addEventListener('load', startDanmu);
-
-// 窗口大小变化时重新创建轨道
-window.addEventListener('resize', startDanmu);
-
-// 侧边栏功能
-const danmuSidebar = document.getElementById('danmuSidebar');
-const sidebarToggle = document.getElementById('sidebarToggle');
-
-// 切换侧边栏展开状态
-sidebarToggle.addEventListener('click', function() {
-    danmuSidebar.classList.toggle('expanded');
-});
-
-// 颜色选择功能
-const colorOptions = document.querySelectorAll('.color-option');
-colorOptions.forEach(option => {
-    option.addEventListener('click', function() {
-        // 移除所有选项的选中状态
-        colorOptions.forEach(opt => opt.classList.remove('selected'));
-        
-        // 添加当前选项的选中状态
-        this.classList.add('selected');
-        
-        // 更新选中颜色
-        selectedColor = this.getAttribute('data-color');
-        
-        // 更新预览
-        updateDanmuPreview();
-    });
-});
-
-// 表单输入实时预览
-document.getElementById('danmuName').addEventListener('input', updateDanmuPreview);
-document.getElementById('danmuContent').addEventListener('input', updateDanmuPreview);
-
-// 预览按钮
-document.getElementById('previewBtn').addEventListener('click', updateDanmuPreview);
-
-// 表单提交
-document.getElementById('danmuForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+// 页面加载完成后的初始化
+function init() {
+    // 初始化主题
+    loadTheme();
     
-    const name = document.getElementById('danmuName').value;
-    const content = document.getElementById('danmuContent').value;
+    // 初始化弹幕状态
+    loadDanmuState();
     
-    sendDanmu(name, content, selectedColor);
-});
+    // 初始化倒计时
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    
+    // 初始化侧边栏
+    initSidebar();
+    
+    // 初始化按钮效果
+    initButtonEffects();
+    
+    // 初始化预览
+    updateDanmuPreview();
+    
+    // 启动弹幕系统
+    startDanmu();
+    
+    // 添加事件监听器
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('danmuToggle').addEventListener('click', toggleDanmu);
+}
 
-// 初始化预览
-updateDanmuPreview();
+// 页面加载完成后执行初始化
+window.addEventListener('load', init);
